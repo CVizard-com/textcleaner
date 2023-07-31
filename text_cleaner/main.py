@@ -1,4 +1,4 @@
-from text_cleaner.cleaner import anonymize_text, Engine
+import cleaner
 import os
 from kafka import KafkaProducer, KafkaConsumer
 
@@ -15,7 +15,7 @@ def main():
     for msg in consumer:
         text = msg.value.decode('utf-8')
         key = msg.key
-        anonymized_text = anonymize_text(text, Engine.PL)
+        anonymized_text = cleaner.anonymize_text(text, cleaner.Engine.PL)
         producer.send(output_topic_name, value=anonymized_text.encode('utf-8'), key=key)
 
 
