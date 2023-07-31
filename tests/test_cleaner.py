@@ -5,4 +5,4 @@ text = "Nazywam się Jan Kowalski. Mój email to abc123@gmail.com, mój numer te
 
 
 def test_anonymize_text():
-    assert cleaner.anonymize_text(text, cleaner.Engine.PL) == "Nazywam się [private]. Mój email to [private], mój numer telefonu to [private]. Mieszkam w Polsce, w Warszawie."
+    assert cleaner.anonymize_text(text, cleaner.Engine.PL) == "Nazywam się . Mój email to , mój numer telefonu to . Mieszkam w Polsce, w Warszawie."
