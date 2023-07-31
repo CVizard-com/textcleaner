@@ -1,4 +1,4 @@
-from text_cleaner import anonymize_text, Engine
+from text_cleaner.cleaner import anonymize_text, Engine
 import os
 from kafka import KafkaProducer, KafkaConsumer
 
