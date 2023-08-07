@@ -1,26 +1,8 @@
 from text_cleaner import cleaner
 
 
-text = "Andrew abc123@gmail.com https://www.google.com/ +48551523607 Warsaw Poland"
-test_entities = {
-        'email': ['abc123@gmail.com'],
-        'url': ['https://www.google.com/'],
-        'name': ['Andrew'],
-        'address': ['Warsaw', 'Poland'],
-        'phone': ['+48551523607']
-    }
+text = "Nazywam się Jan Kowalski. Mój email to abc123@gmail.com, mój numer telefonu to 123456789. Mieszkam w Polsce, w Warszawie."
 
 
-def test_detect_entities():
-    entities = cleaner.detect_entities(text)
-    assert entities == {
-        'email': ['abc123@gmail.com'],
-        'url': ['https://www.google.com/'],
-        'name': ['Andrew'],
-        'address': ['Warsaw Poland'],
-        'phone': ['+', '48', '55']
-    }
-
-def test_delete_entities():
-    assert isinstance(cleaner.delete_entities(text, test_entities), str) == True
-    assert cleaner.delete_entities(text, test_entities) == "     "
+def test_anonymize_text():
+    assert cleaner.anonymize_text(text, cleaner.Engine.PL) == "Nazywam się . Mój email to , mój numer telefonu to . Mieszkam w Polsce, w Warszawie."

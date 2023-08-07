@@ -1,51 +1,22 @@
 import spacy
-from transformers import pipeline
+import os
 from spacy.matcher import Matcher
+import re
+import strenum
 
 
-ENTITY_TYPES = [
-    'B-PERSON', 'I-PERSON',
-    'B-PHYSICAL_LOCATION', 'I-PHYSICAL_LOCATION',
-    'B-COUNTRY', 'I-COUNTRY',
-    'B-PHONE_NUMBER', 'I-PHONE_NUMBER',
-    'B-GREEN_CARD', 'I-GREEN_CARD',
-    'B-US_SSN', 'I-US_SSN',
-    'B-US_PASSPORT', 'I-US_PASSPORT'
-]
+PHONE_REGEX = r'(?:(?:(?:\+|00)?48)|(?:\(\+?48\)))?(?:1[2-8]|2[2-69]|3[2-49]|4[1-8]|5[0-9]|6[0-35-9]|[7-8][1-9]|9[145])\d{7}'
+ENTITY_TYPES = ['persName', 'geogName, PERSON']
 
-ENTITY_GROUPS = [
-    'PERSON',
-    'PHYSICAL_LOCATION',
-    'COUNTRY',
-    'PHONE_NUMBER',
-    'GREEN_CARD',
-    'US_SSN',
-    'US_PASSPORT'
-]
+replacement = ""
 
-ENTITY_GROUP_TO_NAME = {
-    'PERSON': 'name',
-    'PHYSICAL_LOCATION': 'address',
-    'COUNTRY': 'address',
-    'PHONE_NUMBER': 'phone',
-    'GREEN_CARD': 'phone',
-    'US_SSN': 'phone',
-    'US_PASSPORT': 'phone'
-}
-
-REPLACEMENT = ""
-
-SPACY_MODEL = 'en_core_web_lg'
-
-HUGGINGFACE_MODEL = 'xooca/roberta_ner_personal_info'
+class Engine(strenum.StrEnum):
+    PL = 'pl_core_news_lg'
+    EN = 'en_core_web_lg'
 
 
-
-
-def detect_entities(text: str) -> dict[list]:
-    entities = {}
-
-    nlp = spacy.load(SPACY_MODEL)
+def anonymize_text(text: str, engine: str) -> str:
+    nlp = spacy.load(engine)
     doc = nlp(text)
 
     email_pattern = [{"LIKE_EMAIL": True}]
@@ -53,41 +24,18 @@ def detect_entities(text: str) -> dict[list]:
 
     matcher = Matcher(nlp.vocab)
     matcher.add("EMAIL", [email_pattern])
-
-    entities['email'] = [str(match) for match in matcher(doc, as_spans=True)]
-
-    matcher.remove("EMAIL")
     matcher.add("URL", [url_pattern])
 
-    entities['url'] = [str(match) for match in matcher(doc, as_spans=True)]
+    matches = [str(match) for match in matcher(doc, as_spans=True)]
+    matches += re.findall(PHONE_REGEX, text)
 
-    pipe = pipeline("token-classification", model=HUGGINGFACE_MODEL, grouped_entities=True)
+    anonymized_text = text
+
+    for ent in doc.ents:
+        if ent.label_ in ENTITY_TYPES:
+            anonymized_text = anonymized_text.replace(ent.text, replacement)
+
+    for match in matches:
+        anonymized_text = anonymized_text.replace(match, replacement)
     
-    tokens = pipe(text)
-
-    for token in tokens:
-        if token['entity_group'] in ENTITY_GROUPS:
-            word = token['word'].strip()
-            entity_name = ENTITY_GROUP_TO_NAME[token['entity_group']]
-
-            if entity_name not in entities:
-                entities[entity_name] = []
-            
-            entities[entity_name].append(word)
-
-    return entities
-
-
-
-def delete_entities(text: str, entities: dict[list]) -> str:
-    for entity in entities:
-        for value in entities[entity]:
-            text = text.replace(value, REPLACEMENT)
-
-    return text
-
-
-
-if __name__ == "__main__":
-    text = "Nazywam się Jan Kowalski. Mój email to abc123@gmail.com, mój numer telefonu to 123456789. Mieszkam w Polsce, w Warszawie."
-    print(detect_entities(text))
+    return anonymized_text
