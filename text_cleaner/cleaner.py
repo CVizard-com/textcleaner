@@ -1,5 +1,4 @@
 import spacy
-import os
 from transformers import pipeline
 from spacy.matcher import Matcher
 
