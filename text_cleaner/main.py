@@ -1,10 +1,10 @@
-import cleaner
+from text_cleaner import cleaner
 import os
 import uuid
 from kafka import KafkaProducer, KafkaConsumer
 from fastapi import FastAPI
-from models import UploadCV
-import utils
+from text_cleaner.models import UploadCV
+from text_cleaner import utils
 
 input_topic_name = os.environ['PDF_TEXT_TOPIC']
 output_topic_name = os.environ['CLEANED_TEXT_TOPIC']
@@ -16,7 +16,7 @@ producer = utils.get_kafka_producer(output_topic_name, bootstrap_servers)
 consumer = utils.get_kafka_consumer(input_topic_name, bootstrap_servers)
 
 @app.get("/cleaned/{item_uuid}", response_model=UploadCV)
-def get_cleaned_cv(item_uuid: uuid.uuid4):
+def get_cleaned_cv(item_uuid: str):
     
     for msg in consumer:
         text = msg.value.decode('utf-8')
