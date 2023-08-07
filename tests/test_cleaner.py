@@ -24,3 +24,7 @@
 # def test_delete_entities():
 #     assert isinstance(cleaner.delete_entities(text, test_entities), str) == True
 #     assert cleaner.delete_entities(text, test_entities) == "     "
+
+
+def test_clean_text():
+    assert 0 == 0
