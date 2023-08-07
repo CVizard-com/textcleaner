@@ -13,7 +13,17 @@ ENTITY_TYPES = [
     'B-US_PASSPORT', 'I-US_PASSPORT'
 ]
 
-ENTITY_TYPE_TO_NAME = {
+ENTITY_GROUPS = [
+    'PERSON',
+    'PHYSICAL_LOCATION',
+    'COUNTRY',
+    'PHONE_NUMBER',
+    'GREEN_CARD',
+    'US_SSN',
+    'US_PASSPORT'
+]
+
+ENTITY_GROUP_TO_NAME = {
     'PERSON': 'name',
     'PHYSICAL_LOCATION': 'address',
     'COUNTRY': 'address',
@@ -51,47 +61,22 @@ def detect_entities(text: str) -> dict[list]:
 
     entities['url'] = [str(match) for match in matcher(doc, as_spans=True)]
 
-    pipe = pipeline("token-classification", model=HUGGINGFACE_MODEL)
+    pipe = pipeline("token-classification", model=HUGGINGFACE_MODEL, grouped_entities=True)
     
     tokens = pipe(text)
 
-    spanned_tokens = spannify(text, tokens)
+    for token in tokens:
+        if token['entity_group'] in ENTITY_GROUPS:
+            word = token['word'].strip()
+            entity_name = ENTITY_GROUP_TO_NAME[token['entity_group']]
 
-    entities |= spanned_tokens
+            if entity_name not in entities:
+                entities[entity_name] = []
+            
+            entities[entity_name].append(word)
 
     return entities
 
-
-def spannify(text: str, tokens: list[dict]) -> dict[list]:
-    spanned_tokens = {
-        'name': [],
-        'address': [],
-        'phone': []
-    }
-    last_token = None
-    current_word = ''
-
-    for token in tokens:
-        current_token_type = token['entity'][2::]
-        last_token_type = last_token['entity'][2::] if last_token is not None else None
-        is_token_inside = token['entity'][0] == 'I'
-        current_token_word = text[token['start']:token['end']]
-
-        if token['entity'] in ENTITY_TYPES:
-            if last_token is None:
-                last_token = token
-                current_word += current_token_word
-            elif last_token_type == current_token_type and is_token_inside:
-                current_word += current_token_word
-                last_token = token
-            else:
-                spanned_tokens[ENTITY_TYPE_TO_NAME[last_token_type]].append(current_word)
-                current_word = current_token_word
-                last_token = token
-
-    spanned_tokens[ENTITY_TYPE_TO_NAME[last_token_type]].append(current_word)
-    
-    return spanned_tokens
 
 
 def delete_entities(text: str, entities: dict[list]) -> str:
@@ -106,4 +91,3 @@ def delete_entities(text: str, entities: dict[list]) -> str:
 if __name__ == "__main__":
     text = "Nazywam się Jan Kowalski. Mój email to abc123@gmail.com, mój numer telefonu to 123456789. Mieszkam w Polsce, w Warszawie."
     print(detect_entities(text))
-    

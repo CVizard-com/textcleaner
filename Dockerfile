@@ -8,12 +8,21 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update \
   && apt-get -y install netcat gcc \
+  # && apt-get -y install git \
+  # && apt-get install git-lfs \
   && apt-get clean
+
+# RUN git lfs install \
+#   && git clone https://huggingface.co/xooca/roberta_ner_personal_info 
+
+# RUN rm -rf roberta_ner_personal_info/.git
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY . . 
+
+RUN python -c 'from transformers import pipeline; pipe = pipeline("token-classification", model="xooca/roberta_ner_personal_info", grouped_entities=True)' 
 
 COPY ./entrypoint.sh .
 RUN chmod 777 /app/entrypoint.sh \                                              

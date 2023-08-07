@@ -17,7 +17,7 @@ def test_detect_entities():
         'email': ['abc123@gmail.com'],
         'url': ['https://www.google.com/'],
         'name': ['Andrew'],
-        'address': ['WarsawPoland'],
+        'address': ['Warsaw Poland'],
         'phone': ['+', '48', '55']
     }
 
