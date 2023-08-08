@@ -35,7 +35,11 @@ jobs:
 
     - name: Run python
       run: |
-        python text_cleaner/main.py
+        python text_cleaner/main.py &
+        echo $! > text_cleaner_pid.txt &
+        sleep 5 &
+        kill -9 `cat text_cleaner_pid.txt` &
+        rm text_cleaner_pid.txt &
       env:
           BOOTSTRAP_SERVERS: localhost:9092
           PDF_TEXT_TOPIC: pdf-text
