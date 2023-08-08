@@ -8,4 +8,4 @@ class UploadCV(BaseModel):
     address: list[str]
     phone: list[str]
     email: list[str]
-    website: list[str]
+    url: list[str]

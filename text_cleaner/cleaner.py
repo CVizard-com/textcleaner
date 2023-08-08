@@ -43,7 +43,13 @@ HUGGINGFACE_MODEL = 'xooca/roberta_ner_personal_info'
 
 
 def detect_entities(text: str) -> dict[list]:
-    entities = {}
+    entities = {
+        'name': [],
+        'address': [],
+        'phone': [],
+        'email': [],
+        'url': []
+    }
 
     nlp = spacy.load(SPACY_MODEL)
     doc = nlp(text)
@@ -69,10 +75,6 @@ def detect_entities(text: str) -> dict[list]:
         if token['entity_group'] in ENTITY_GROUPS:
             word = token['word'].strip()
             entity_name = ENTITY_GROUP_TO_NAME[token['entity_group']]
-
-            if entity_name not in entities:
-                entities[entity_name] = []
-            
             entities[entity_name].append(word)
 
     return entities
