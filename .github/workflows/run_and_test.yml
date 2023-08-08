@@ -36,6 +36,10 @@ jobs:
     - name: Run python
       run: |
         python text_cleaner/main.py
+      env:
+          BOOTSTRAP_SERVERS: localhost:9092
+          PDF_TEXT_TOPIC: pdf-text
+          CLEANED_TEXT_TOPIC: cleaned-text
       
     # - name: Run uvicorn
     #   run: |
