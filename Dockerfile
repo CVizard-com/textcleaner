@@ -15,6 +15,8 @@ RUN pip install -r requirements.txt
 
 COPY . . 
 
+RUN python -c 'from transformers import pipeline; pipe = pipeline("token-classification", model="xooca/roberta_ner_personal_info", grouped_entities=True)' 
+
 COPY ./entrypoint.sh .
 RUN chmod 777 /app/entrypoint.sh \                                              
     && ln -s /app/entrypoint.sh / \
