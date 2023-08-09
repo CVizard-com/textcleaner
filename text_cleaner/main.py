@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from text_cleaner.models import UploadCV
 from text_cleaner import utils
 import threading
+from fastapi.middleware.cors import CORSMiddleware
 
 
 input_topic_name = os.environ['PDF_TEXT_TOPIC']
@@ -14,6 +15,15 @@ bootstrap_servers = [os.environ['BOOTSTRAP_SERVERS']]
 
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def get_kafka_producer():
@@ -27,8 +37,8 @@ producer = get_kafka_producer()
 consumer = get_kafka_consumer()
 
 
-print(f'Consumer {"not" if consumer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
-print(f'Producer {"not" if producer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
+print(f'Consumer{" not" if not consumer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
+print(f'Producer{" not" if not producer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
 
 
 messages = utils.get_messages()
@@ -54,19 +64,24 @@ def get_cleaned_cv(item_uuid: str):
 
     text = messages.get(item_uuid, None)
 
-    if text:
-        response_entity = cleaner.detect_entities(text)
-        response_entity['id'] = item_uuid
-        return response_entity
-    else:
+    if not text:
         raise HTTPException(status_code=404, detail="Item not found")
+
+    response_entity = cleaner.detect_entities(text)
+    response_entity['id'] = item_uuid
+    return response_entity
 
 
 @app.post("/upload")
 def upload_changes(cv: UploadCV):
+
     entities = cv.dict()
     id = entities.pop('id')
     text = messages.pop(id, None)
+
+    if not text:
+        raise HTTPException(status_code=404, detail="Item not found")
+
     anonymized_text = cleaner.delete_entities(text, entities)
     producer.send(output_topic_name, value=anonymized_text.encode('utf-8'), key=id.encode('utf-8')) 
     return {"message": "Changes uploaded successfully"}
