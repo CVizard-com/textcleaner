@@ -5,6 +5,8 @@ from kafka import KafkaProducer, KafkaConsumer
 from fastapi import FastAPI, HTTPException
 from text_cleaner.models import UploadCV
 from text_cleaner import utils
+import threading
+
 
 input_topic_name = os.environ['PDF_TEXT_TOPIC']
 output_topic_name = os.environ['CLEANED_TEXT_TOPIC']
@@ -13,11 +15,31 @@ bootstrap_servers = [os.environ['BOOTSTRAP_SERVERS']]
 
 app = FastAPI()
 
+
 producer = utils.get_kafka_producer(output_topic_name, bootstrap_servers)
 consumer = utils.get_kafka_consumer(input_topic_name, bootstrap_servers)
 
 
+print(f'Consumer {"not" if consumer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
+print(f'Producer {"not" if producer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
+
+
 messages = {}
+
+
+def consume_messages():
+    for msg in consumer:
+        key = msg.key.decode('utf-8')
+        value = msg.value.decode('utf-8')
+        messages[key] = value
+        print('----------------------------------------------')
+        print(f'key: {key}')
+        print(f'value: {value}')
+        print('----------------------------------------------')
+
+
+consumer_thread = threading.Thread(target=consume_messages)
+consumer_thread.start()
 
 
 @app.get("/cleaned", response_model=UploadCV)
@@ -41,13 +63,3 @@ def upload_changes(cv: UploadCV):
     anonymized_text = cleaner.delete_entities(text, entities)
     producer.send(output_topic_name, value=anonymized_text.encode('utf-8'), key=id.encode('utf-8')) 
     return {"message": "Changes uploaded successfully"}
-
-
-
-for msg in consumer:
-    key = msg.key.decode('utf-8')
-    value = msg.value.decode('utf-8')
-    messages[key] = value
-    print(f'key: {key}')
-    print(f'value: {value}')
-    print('----------------------------------------------')

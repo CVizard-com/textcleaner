@@ -40,8 +40,6 @@ SPACY_MODEL = 'en_core_web_lg'
 HUGGINGFACE_MODEL = 'xooca/roberta_ner_personal_info'
 
 
-
-
 def detect_entities(text: str) -> dict[list]:
     entities = {
         'name': [],
@@ -91,5 +89,5 @@ def delete_entities(text: str, entities: dict[list]) -> str:
 
 
 if __name__ == "__main__":
-    text = "Nazywam się Jan Kowalski. Mój email to abc123@gmail.com, mój numer telefonu to 123456789. Mieszkam w Polsce, w Warszawie."
+    text = "Nazywam się Artur. Mój email to abc123@gmail.com, mój numer telefonu to 123456789. Mieszkam w Polsce, w Warszawie."
     print(detect_entities(text))
