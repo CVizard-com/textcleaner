@@ -2,7 +2,7 @@ from text_cleaner import cleaner
 import os
 import uuid
 from kafka import KafkaProducer, KafkaConsumer
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from text_cleaner.models import UploadCV
 from text_cleaner import utils
 import threading
@@ -16,15 +16,22 @@ bootstrap_servers = [os.environ['BOOTSTRAP_SERVERS']]
 app = FastAPI()
 
 
-producer = utils.get_kafka_producer(output_topic_name, bootstrap_servers)
-consumer = utils.get_kafka_consumer(input_topic_name, bootstrap_servers)
+def get_kafka_producer():
+    return utils.create_kafka_producer(bootstrap_servers=bootstrap_servers)
+
+def get_kafka_consumer():
+    return utils.create_kafka_consumer(bootstrap_servers=bootstrap_servers, input_topic_name=input_topic_name)
+
+
+producer = get_kafka_producer()
+consumer = get_kafka_consumer()
 
 
 print(f'Consumer {"not" if consumer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
 print(f'Producer {"not" if producer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
 
 
-messages = {}
+messages = utils.get_messages()
 
 
 def consume_messages():
