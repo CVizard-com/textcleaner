@@ -23,3 +23,16 @@ def test_detect_entities():
 
 def test_delete_entities():
     assert cleaner.delete_entities(text, test_entities) == "     "
+
+
+def test_make_text_parts():
+    text = 'Small apple is hanging on the three'
+    parts = cleaner.make_text_parts(text, 12)
+    assert parts == ['Small apple', ' is hanging', ' on the', ' three']
+    assert all(len(part) <= 12 for part in parts)
+
+
+def test_make_text_parts_shorter_text():
+    text = 'Small apple is hanging on the three'
+    parts = cleaner.make_text_parts(text, 50)
+    assert parts == ['Small apple is hanging on the three']
