@@ -9,3 +9,4 @@ class UploadCV(BaseModel):
     phone: list[str]
     email: list[str]
     url: list[str]
+    other: list[str]

@@ -46,7 +46,8 @@ def detect_entities(text: str) -> dict[list]:
         'address': [],
         'phone': [],
         'email': [],
-        'url': []
+        'url': [],
+        'other': []
     }
 
     nlp = spacy.load(SPACY_MODEL)
