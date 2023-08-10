@@ -3,81 +3,103 @@ from transformers import pipeline
 from spacy.matcher import Matcher
 
 
-ENTITY_TYPES = [
-    'B-PERSON', 'I-PERSON',
-    'B-PHYSICAL_LOCATION', 'I-PHYSICAL_LOCATION',
-    'B-COUNTRY', 'I-COUNTRY',
-    'B-PHONE_NUMBER', 'I-PHONE_NUMBER',
-    'B-GREEN_CARD', 'I-GREEN_CARD',
-    'B-US_SSN', 'I-US_SSN',
-    'B-US_PASSPORT', 'I-US_PASSPORT'
-]
+SPACY_MODEL = 'en_core_web_sm'
+NAME_RECOGNITION_MODEL = 'Babelscape/wikineural-multilingual-ner'
+ADDRESS_RECOGNITION_MODEL = 'Babelscape/wikineural-multilingual-ner'
+PHONE_NUMBER_REGEX = r'(?:(?:(?:\+|00)?48)|(?:\(\+?48\)))?(?:1[2-8]|2[2-69]|3[2-49]|4[1-8]|5[0-9]|6[0-35-9]|[7-8][1-9]|9[145])\d{7}'
 
-ENTITY_GROUPS = [
-    'PERSON',
-    'PHYSICAL_LOCATION',
-    'COUNTRY',
-    'PHONE_NUMBER',
-    'GREEN_CARD',
-    'US_SSN',
-    'US_PASSPORT'
-]
+NAME_ENT_TYPE = 'PER'
+ADDRESS_ENT_TYPE = 'LOC'
 
-ENTITY_GROUP_TO_NAME = {
-    'PERSON': 'name',
-    'PHYSICAL_LOCATION': 'address',
-    'COUNTRY': 'address',
-    'PHONE_NUMBER': 'phone',
-    'GREEN_CARD': 'phone',
-    'US_SSN': 'phone',
-    'US_PASSPORT': 'phone'
-}
+MAX_AMOUT_OF_CHARS = 1500
 
-REPLACEMENT = ""
+REPLACEMENT = ''
 
-SPACY_MODEL = 'en_core_web_lg'
 
-HUGGINGFACE_MODEL = 'xooca/roberta_ner_personal_info'
+def detect_names(text: str) -> list[str]:
+    pipe = pipeline('ner', model=NAME_RECOGNITION_MODEL, grouped_entities=True)
+
+    text_parts = [text[i:i + MAX_AMOUT_OF_CHARS] for i in range(0, len(text), MAX_AMOUT_OF_CHARS)]
+
+    names = []
+
+    for part in text_parts:
+        entities = pipe(part)
+
+        for entity in entities:
+            if entity['entity_group'] == NAME_ENT_TYPE:
+                names.append(entity['word'])
+
+    return names
+
+
+def detect_addresses(text: str) -> list[str]:
+    pipe = pipeline('ner', model=ADDRESS_RECOGNITION_MODEL, grouped_entities=True)
+
+    text_parts = [text[i:i + MAX_AMOUT_OF_CHARS] for i in range(0, len(text), MAX_AMOUT_OF_CHARS)]
+
+    addresses = []
+
+    for part in text_parts:
+        entities = pipe(part)
+
+        for entity in entities:
+            if entity['entity_group'] == ADDRESS_ENT_TYPE:
+                addresses.append(entity['word'])
+
+    return addresses
+
+
+def detect_phone_numbers(text: str) -> list[str]:
+    nlp = spacy.load(SPACY_MODEL)
+    matcher = Matcher(nlp.vocab)
+    matcher.add('phone_number', [[{"TEXT": {"REGEX": PHONE_NUMBER_REGEX}}]])
+
+    doc = nlp(text)
+
+    matches = matcher(doc)
+
+    phone_numbers = []
+
+    for match_id, start, end in matches:
+        span = doc[start:end]
+        phone_numbers.append(span.text)
+
+    return phone_numbers
+
+
+def detect_emails(text: str) -> list[str]:
+    nlp = spacy.load(SPACY_MODEL)
+    matcher = Matcher(nlp.vocab)
+    matcher.add("EMAIL", [[{"LIKE_EMAIL": True}]])
+
+    doc = nlp(text)
+
+    emails = [str(match) for match in matcher(doc, as_spans=True)]
+
+    return emails
+
+
+def detect_urls(text: str) -> list[str]:
+    nlp = spacy.load(SPACY_MODEL)
+    matcher = Matcher(nlp.vocab)
+    matcher.add("URL", [[{"LIKE_URL": True}]])
+
+    doc = nlp(text)
+
+    urls = [str(match) for match in matcher(doc, as_spans=True)]
+
+    return urls
 
 
 def detect_entities(text: str) -> dict[list]:
-    entities = {
-        'name': [],
-        'address': [],
-        'phone': [],
-        'email': [],
-        'url': [],
-        'other': []
+    return {
+        'name': detect_names(text),
+        'address': detect_addresses(text),
+        'phone': detect_phone_numbers(text),
+        'email': detect_emails(text),
+        'url': detect_urls(text)
     }
-
-    nlp = spacy.load(SPACY_MODEL)
-    doc = nlp(text)
-
-    email_pattern = [{"LIKE_EMAIL": True}]
-    url_pattern = [{"LIKE_URL": True}]
-
-    matcher = Matcher(nlp.vocab)
-    matcher.add("EMAIL", [email_pattern])
-
-    entities['email'] = [str(match) for match in matcher(doc, as_spans=True)]
-
-    matcher.remove("EMAIL")
-    matcher.add("URL", [url_pattern])
-
-    entities['url'] = [str(match) for match in matcher(doc, as_spans=True)]
-
-    pipe = pipeline("token-classification", model=HUGGINGFACE_MODEL, grouped_entities=True)
-    
-    tokens = pipe(text)
-
-    for token in tokens:
-        if token['entity_group'] in ENTITY_GROUPS:
-            word = token['word'].strip()
-            entity_name = ENTITY_GROUP_TO_NAME[token['entity_group']]
-            entities[entity_name].append(word)
-
-    return entities
-
 
 
 def delete_entities(text: str, entities: dict[list]) -> str:
@@ -88,7 +110,8 @@ def delete_entities(text: str, entities: dict[list]) -> str:
     return text
 
 
+if __name__ == '__main__':
+    text = 'Michael Cors, abc123@gmail.com https://www.google.com/ +48551523607 Warsaw Poland'
 
-if __name__ == "__main__":
-    text = "Nazywam się Artur. Mój email to abc123@gmail.com, mój numer telefonu to 123456789. Mieszkam w Polsce, w Warszawie."
     print(detect_entities(text))
+

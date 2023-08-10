@@ -69,6 +69,7 @@ def get_cleaned_cv(item_uuid: str):
 
     response_entity = cleaner.detect_entities(text)
     response_entity['id'] = item_uuid
+    response_entity['other'] = []
     return response_entity
 
 

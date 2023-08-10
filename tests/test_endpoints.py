@@ -61,7 +61,8 @@ def test_post_upload(mock_get_messages, monkeypatch, mock_create_kafka_consumer,
         'address': [],
         'phone': [],
         'email': [],
-        'url': []
+        'url': [],
+        'other': []
     }
     response = client.post('/upload', json=body)
 
