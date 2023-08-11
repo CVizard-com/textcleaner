@@ -15,8 +15,6 @@ RUN pip install -r requirements.txt
 
 COPY . . 
 
-RUN python -c 'from transformers import pipeline; pipe = pipeline("token-classification", model="Babelscape/wikineural-multilingual-ner", grouped_entities=True)' 
-
 COPY ./entrypoint.sh .
 RUN chmod 777 /app/entrypoint.sh \                                              
     && ln -s /app/entrypoint.sh / \

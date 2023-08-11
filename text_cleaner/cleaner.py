@@ -3,9 +3,9 @@ from transformers import pipeline
 from spacy.matcher import Matcher
 
 
-SPACY_MODEL = 'en_core_web_sm'
-NAME_RECOGNITION_MODEL = 'Babelscape/wikineural-multilingual-ner'
-ADDRESS_RECOGNITION_MODEL = 'Babelscape/wikineural-multilingual-ner'
+SPACY_MODEL = 'models/en_core_web_sm'
+NAME_RECOGNITION_MODEL = 'models/wikineural-multilingual-ner'
+ADDRESS_RECOGNITION_MODEL = 'models/wikineural-multilingual-ner'
 PHONE_NUMBER_REGEX = r'(?:(?:(?:\+|00)?48)|(?:\(\+?48\)))?(?:1[2-8]|2[2-69]|3[2-49]|4[1-8]|5[0-9]|6[0-35-9]|[7-8][1-9]|9[145])\d{7}'
 
 NAME_ENT_TYPE = 'PER'
