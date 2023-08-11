@@ -1,8 +1,6 @@
 from text_cleaner import cleaner
 import os
-import uuid
-from kafka import KafkaProducer, KafkaConsumer
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from text_cleaner.models import UploadCV
 from text_cleaner import utils
 import threading
