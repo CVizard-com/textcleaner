@@ -53,7 +53,7 @@ consumer_thread = threading.Thread(target=consume_messages)
 consumer_thread.start()
 
 
-@app.get("/cleaner/cleaned", response_model=UploadCV)
+@app.get("/api/cleaner/cleaned", response_model=UploadCV)
 def get_cleaned_cv(item_uuid: str):
 
     text = messages.get(item_uuid, None)
@@ -67,7 +67,7 @@ def get_cleaned_cv(item_uuid: str):
     return response_entity
 
 
-@app.post("/cleaner/upload")
+@app.post("/api/cleaner/upload")
 def upload_changes(cv: UploadCV):
 
     entities = cv.dict()
