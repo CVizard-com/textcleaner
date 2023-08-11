@@ -28,7 +28,7 @@ def test_get_cleaned(mock_get_messages, monkeypatch, mock_create_kafka_producer,
     from text_cleaner.main import app
     client = TestClient(app)
 
-    response = client.get('/cleaned', params={'item_uuid': '1234'})
+    response = client.get('/cleaner/cleaned', params={'item_uuid': '1234'})
 
     assert response.status_code == 200
     assert response.json()['id'] == '1234'
@@ -42,7 +42,7 @@ def test_get_cleaned_not_found(mock_get_messages, monkeypatch, mock_create_kafka
     from text_cleaner.main import app
     client = TestClient(app)
 
-    response = client.get('/cleaned', params={'item_uuid': '9999'})
+    response = client.get('/cleaner/cleaned', params={'item_uuid': '9999'})
 
     assert response.status_code == 404
 
@@ -64,7 +64,7 @@ def test_post_upload(mock_get_messages, monkeypatch, mock_create_kafka_consumer,
         'url': [],
         'other': []
     }
-    response = client.post('/upload', json=body)
+    response = client.post('/cleaner/upload', json=body)
 
     assert response.status_code == 200
     assert response.json() == {'message': 'Changes uploaded successfully'}

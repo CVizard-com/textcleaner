@@ -35,10 +35,6 @@ producer = get_kafka_producer()
 consumer = get_kafka_consumer()
 
 
-print(f'Consumer{" not" if not consumer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
-print(f'Producer{" not" if not producer.bootstrap_connected() else ""} connected to {bootstrap_servers}')
-
-
 messages = utils.get_messages()
 
 
@@ -57,7 +53,7 @@ consumer_thread = threading.Thread(target=consume_messages)
 consumer_thread.start()
 
 
-@app.get("/cleaned", response_model=UploadCV)
+@app.get("/cleaner/cleaned", response_model=UploadCV)
 def get_cleaned_cv(item_uuid: str):
 
     text = messages.get(item_uuid, None)
@@ -71,7 +67,7 @@ def get_cleaned_cv(item_uuid: str):
     return response_entity
 
 
-@app.post("/upload")
+@app.post("/cleaner/upload")
 def upload_changes(cv: UploadCV):
 
     entities = cv.dict()
