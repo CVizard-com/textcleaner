@@ -1,12 +1,14 @@
 import spacy
 from transformers import pipeline
 from spacy.matcher import Matcher
+import re
 
 
 SPACY_MODEL = 'models/en_core_web_sm'
 NAME_RECOGNITION_MODEL = 'models/wikineural-multilingual-ner'
 ADDRESS_RECOGNITION_MODEL = 'models/wikineural-multilingual-ner'
-PHONE_NUMBER_REGEX = r'(?:(?:(?:\+|00)?48)|(?:\(\+?48\)))?(?:1[2-8]|2[2-69]|3[2-49]|4[1-8]|5[0-9]|6[0-35-9]|[7-8][1-9]|9[145])\d{7}'
+
+PHONE_NUMBER_REGEX = r'(?:[\+][(]?[0-9]{1,3}[)]?[-\s\.]?)?[(]?[0-9]{1,3}[)]?(?:[-\s\.]?[0-9]{3,5}){2}'
 
 NAME_ENT_TYPE = 'PER'
 ADDRESS_ENT_TYPE = 'LOC'
@@ -30,7 +32,7 @@ def detect_names(text: str) -> list[str]:
             if entity['entity_group'] == NAME_ENT_TYPE:
                 names.append(entity['word'])
 
-    return names
+    return list(set(names))
 
 
 def detect_addresses(text: str) -> list[str]:
@@ -47,25 +49,13 @@ def detect_addresses(text: str) -> list[str]:
             if entity['entity_group'] == ADDRESS_ENT_TYPE:
                 addresses.append(entity['word'])
 
-    return addresses
+    return list(set(addresses))
 
 
 def detect_phone_numbers(text: str) -> list[str]:
-    nlp = spacy.load(SPACY_MODEL)
-    matcher = Matcher(nlp.vocab)
-    matcher.add('phone_number', [[{"TEXT": {"REGEX": PHONE_NUMBER_REGEX}}]])
+    phone_numbers = re.findall(PHONE_NUMBER_REGEX, text, re.MULTILINE)
 
-    doc = nlp(text)
-
-    matches = matcher(doc)
-
-    phone_numbers = []
-
-    for match_id, start, end in matches:
-        span = doc[start:end]
-        phone_numbers.append(span.text)
-
-    return phone_numbers
+    return list(set(phone_numbers))
 
 
 def detect_emails(text: str) -> list[str]:
@@ -77,7 +67,7 @@ def detect_emails(text: str) -> list[str]:
 
     emails = [str(match) for match in matcher(doc, as_spans=True)]
 
-    return emails
+    return list(set(emails))
 
 
 def detect_urls(text: str) -> list[str]:
@@ -89,7 +79,7 @@ def detect_urls(text: str) -> list[str]:
 
     urls = [str(match) for match in matcher(doc, as_spans=True)]
 
-    return urls
+    return list(set(urls))
 
 
 def detect_entities(text: str) -> dict[list]:
@@ -152,7 +142,7 @@ def make_text_parts(text: str, max_amount_of_chars) -> list[str]:
 
 
 if __name__ == '__main__':
-    text = 'Michael Cors, abc123@gmail.com +48-551-523-607 Warsaw Poland'
+    text = 'Michael Cors, Michael Cors, abc123@gmail.com +48-551-523-607 Warsaw, Poland'
 
     print(detect_entities(text))
 
