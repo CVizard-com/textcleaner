@@ -43,10 +43,10 @@ def consume_messages():
         key = msg.key.decode('utf-8')
         value = msg.value.decode('utf-8')
         messages[key] = value
-        print('----------------------------------------------')
+        print('----------------------------------------------------------------------------')
         print(f'key: {key}')
         print(f'value: {value}')
-        print('----------------------------------------------')
+        print('----------------------------------------------------------------------------')
 
 
 consumer_thread = threading.Thread(target=consume_messages)
