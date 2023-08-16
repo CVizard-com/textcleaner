@@ -71,11 +71,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt 
 
-    - name: Copy folder using rsync
+    - name: Copy Dependencies via SCP
       run: |
-        rsync -avz --delete -e "ssh -i ${{ secrets.SSH_KEY }}" \
-          venv/lib/* \
-          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
+        scp -r venv/lib/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
 
