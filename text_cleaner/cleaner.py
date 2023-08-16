@@ -3,10 +3,13 @@ from transformers import pipeline
 from spacy.matcher import Matcher
 import re
 
+LOCAL_SPACY_PATH = 'models/en_core_web_sm'
+LOCAL_NAME_RECOGNITION_PATH = 'models/wikineural-multilingual-ner'
+LOCAL_ADDRESS_RECOGNITION_PATH = 'models/wikineural-multilingual-ner'
 
-SPACY_MODEL = 'models/en_core_web_sm'
-NAME_RECOGNITION_MODEL = 'models/wikineural-multilingual-ner'
-ADDRESS_RECOGNITION_MODEL = 'models/wikineural-multilingual-ner'
+SPACY_MODEL = 'en_core_web_sm'
+NAME_RECOGNITION_MODEL = 'Babelscape/wikineural-multilingual-ner'
+ADDRESS_RECOGNITION_MODEL = 'Babelscape/wikineural-multilingual-ner'
 
 PHONE_NUMBER_REGEX = r'(?:[\+][(]?[0-9]{1,3}[)]?[-\s\.]?)?[(]?[0-9]{1,3}[)]?(?:[-\s\.]?[0-9]{3,5}){2}'
 
@@ -17,10 +20,23 @@ MAX_AMOUT_OF_CHARS_IN_PROMPT = 1500
 
 REPLACEMENT = ''
 
+try:
+    name_pipe = pipeline('ner', model=LOCAL_ADDRESS_RECOGNITION_PATH, grouped_entities=True)
+except:
+    name_pipe = pipeline('ner', model=NAME_RECOGNITION_MODEL, grouped_entities=True)
 
-def detect_names(text: str) -> list[str]:
-    pipe = pipeline('ner', model=NAME_RECOGNITION_MODEL, grouped_entities=True)
+try:   
+    address_pipe = pipeline('ner', model=LOCAL_ADDRESS_RECOGNITION_PATH, grouped_entities=True)
+except:
+    address_pipe = pipeline('ner', model=ADDRESS_RECOGNITION_MODEL, grouped_entities=True)
 
+try:
+    spacy_nlp = spacy.load(LOCAL_SPACY_PATH)
+except:
+    spacy_nlp = spacy.load(SPACY_MODEL)
+
+
+def detect_names(text: str, pipe=name_pipe) -> list[str]:
     text_parts = make_text_parts(text, MAX_AMOUT_OF_CHARS_IN_PROMPT)
 
     names = []
@@ -35,9 +51,7 @@ def detect_names(text: str) -> list[str]:
     return list(set(names))
 
 
-def detect_addresses(text: str) -> list[str]:
-    pipe = pipeline('ner', model=ADDRESS_RECOGNITION_MODEL, grouped_entities=True)
-
+def detect_addresses(text: str, pipe=address_pipe) -> list[str]:
     text_parts = make_text_parts(text, MAX_AMOUT_OF_CHARS_IN_PROMPT)
 
     addresses = []
@@ -58,8 +72,7 @@ def detect_phone_numbers(text: str) -> list[str]:
     return list(set(phone_numbers))
 
 
-def detect_emails(text: str) -> list[str]:
-    nlp = spacy.load(SPACY_MODEL)
+def detect_emails(text: str, nlp=spacy_nlp) -> list[str]:
     matcher = Matcher(nlp.vocab)
     matcher.add("EMAIL", [[{"LIKE_EMAIL": True}]])
 
@@ -70,8 +83,7 @@ def detect_emails(text: str) -> list[str]:
     return list(set(emails))
 
 
-def detect_urls(text: str) -> list[str]:
-    nlp = spacy.load(SPACY_MODEL)
+def detect_urls(text: str, nlp=spacy_nlp) -> list[str]:
     matcher = Matcher(nlp.vocab)
     matcher.add("URL", [[{"LIKE_URL": True}]])
 
