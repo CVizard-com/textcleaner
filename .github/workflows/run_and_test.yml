@@ -30,15 +30,3 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-      
-    - name: Run uvicorn
-      run: |
-        uvicorn text_cleaner.main:app --workers 1 --host 0.0.0.0 --port 8082 &
-        echo $! > uvicorn_pid.txt &
-        sleep 5 &
-        kill -9 `cat uvicorn_pid.txt` &
-        rm uvicorn_pid.txt &
-      env:
-        BOOTSTRAP_SERVERS: localhost:9092
-        PDF_TEXT_TOPIC: pdf-text
-        CLEANED_TEXT_TOPIC: cleaned-text
