@@ -55,6 +55,23 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4.7.0
+      with:
+        python-version: "3.11"
+
+    - name: install python dependencies
+      run: pip install -r requirements.txt
+
+    - name: copy file via ssh password
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        source: "/usr/local/lib"
+        target: "/home/januszsoft/CVizard/textcleaner-packages"
+
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.0.0
       with:
