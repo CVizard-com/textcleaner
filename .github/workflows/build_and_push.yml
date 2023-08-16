@@ -67,9 +67,7 @@ jobs:
 
     - name: Print environment variables
       run: |
-        echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-        ls $GITHUB_WORKSPACE
-        pwd $GITHUB_WORKSPACE
+        ls /home/runner/work/_temp/_github_home/venv/lib
 
     - name: Copy folder using rsync
       run: |
