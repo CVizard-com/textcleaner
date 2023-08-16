@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v4.1.1
       with:
         context: .
-        load: true
+        push: true
         tags: cvizard.com:5001/textcleaner:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
