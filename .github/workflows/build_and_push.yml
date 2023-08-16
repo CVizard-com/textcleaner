@@ -63,19 +63,15 @@ jobs:
     - name: Create Virtual Environment
       run: python -m venv venv
 
-    - name: Activate Virtual Environment
-      run: source venv/bin/activate
-
     - name: Install python dependencies
       run: |
+        source venv/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt 
 
     - name: Copy Dependencies via SCP
       run: |
-        scp -r venv/lib/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        scp -i ${{ secrets.SSH_KEY }} -r venv/lib/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.0.0
