@@ -62,18 +62,16 @@ jobs:
 
     - name: install python dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt 
-        ls -l /usr/local/lib
 
-    - name: copy dependencies
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        source: "/usr/local/lib/*"
-        target: "/home/januszsoft/CVizard/textcleaner-packages"
-        rm: true
+    - name: Copy folder using rsync
+      run: |
+        rsync -avz --delete -e "ssh -i ${{ secrets.SSH_KEY }}" \
+          /usr/local/lib \
+          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.0.0
