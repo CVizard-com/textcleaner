@@ -10,7 +10,8 @@ RUN apt-get update \
   && apt-get -y install netcat gcc \
   && apt-get clean
 
-# RUN pip install --upgrade pip
+RUN pip install --upgrade pip
+RUN pip install uvicorn
 # RUN pip install -r requirements.txt
 
 COPY . . 
