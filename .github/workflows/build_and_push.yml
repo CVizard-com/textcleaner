@@ -66,11 +66,11 @@ jobs:
     - name: Install python dependencies
       run: |
         venv/bin/python -m pip install --upgrade pip
-        venv/bin/pip install -r requirements.txt 
+        venv/bin/python -m pip install -r requirements.txt 
 
     - name: Copy Dependencies via SCP
       run: |
-        scp -i ${{ secrets.SSH_KEY }} -r venv/lib/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
+        scp -r -i <(echo ${{ secrets.SSH_KEY }}) ./venv/lib/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.0.0
