@@ -22,15 +22,10 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m venv venv
-        venv/bin/python -m pip install --upgrade pip
-        venv/bin/python -m pip install pytest
-        if [ -f requirements.txt ]; then venv/bin/python -m pip install -r requirements.txt; fi
-        venv/bin/python -m spacy download en_core_web_sm
-        ls
-        ls ./venv
-        ls ./venv/bin
-        ls ./venv/lib
+        python -m pip install --upgrade pip
+        pip install pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python -m spacy download en_core_web_sm
 
     - name: Test with pytest
       run: |
