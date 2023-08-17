@@ -107,7 +107,7 @@ def detect_entities(text: str) -> dict[list]:
 def delete_entities(text: str, entities: dict[list]) -> str:
     for entity in entities:
         for value in entities[entity]:
-            text = text.replace(value, REPLACEMENT)
+            text = text.lower().replace(value.lower(), REPLACEMENT)
 
     return text
 
@@ -154,7 +154,9 @@ def make_text_parts(text: str, max_amount_of_chars) -> list[str]:
 
 
 if __name__ == '__main__':
-    text = 'Michael Cors, Michael Cors, abc123@gmail.com +48-551-523-607 Warsaw, Poland'
+    text = 'Michael Cors, Michael Cors, abc123@gmail.com +48-551-523-607 Warsaw, Poland, dasijASFDNSAOIF AAA'
 
     print(detect_entities(text))
+
+
 
