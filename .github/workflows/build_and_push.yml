@@ -55,22 +55,22 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4.7.0
-      with:
-        python-version: "3.11"
+    # - name: Set up Python 3.11
+    #   uses: actions/setup-python@v4.7.0
+    #   with:
+    #     python-version: "3.11"
 
-    - name: Create Virtual Environment
-      run: python -m venv venv
+    # - name: Create Virtual Environment
+    #   run: python -m venv venv
 
-    - name: Install python dependencies
-      run: |
-        venv/bin/python -m pip install --upgrade pip
-        venv/bin/python -m pip install -r requirements.txt 
+    # - name: Install python dependencies
+    #   run: |
+    #     venv/bin/python -m pip install --upgrade pip
+    #     venv/bin/python -m pip install -r requirements.txt 
 
-    - name: Copy Dependencies via SCP
-      run: |
-        scp -r -i <(echo ${{ secrets.SSH_KEY }}) ./venv/lib/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
+    # - name: Copy Dependencies via SCP
+    #   run: |
+    #     scp -r -i <(echo ${{ secrets.SSH_KEY }}) ./venv/lib/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/januszsoft/CVizard/textcleaner-packages
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.0.0
