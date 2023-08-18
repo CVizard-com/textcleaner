@@ -104,13 +104,41 @@ def detect_entities(text: str) -> dict[list]:
     }
 
 
+def find_all_occurrences_with_indexes(text: str, word: str) -> list[tuple[int, int]]:
+    occurrences = []
+    index = -1
+    
+    while True:
+        index = text.find(word, index + 1)
+        if index == -1:
+            break
+        occurrences.append((index, index + len(word) - 1))
+    
+    return occurrences
+
+
 def delete_entities(text: str, entities: dict[list]) -> str:
-    for entity in entities:
-        for value in entities[entity]:
-            text = text.lower().replace(value.lower(), REPLACEMENT)
+    words_to_delete = []
+    for word_list in entities.values():
+        words_to_delete.extend(word_list)
 
-    return text
+    words_to_delete = list(set(words_to_delete))
 
+    delete_ranges = []
+    for word in words_to_delete:
+        delete_ranges.extend(find_all_occurrences_with_indexes(text.lower(), word.lower()))
+
+    delete_ranges = sorted(delete_ranges, key=lambda x: x[0])
+
+    if not delete_ranges:
+        return text
+    
+    new_text = ''
+    for letter_index, letter in enumerate(text):
+        if not any(start <= letter_index <= end for start, end in delete_ranges):
+            new_text += letter
+
+    return new_text
 
 def make_text_parts(text: str, max_amount_of_chars) -> list[str]:
     """

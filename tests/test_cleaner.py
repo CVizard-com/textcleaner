@@ -25,6 +25,26 @@ def test_delete_entities():
     assert cleaner.delete_entities(text, test_entities) == "     "
 
 
+def test_delete_entities_no_entities():
+    assert cleaner.delete_entities(text, {}) == text
+
+
+def test_delete_entities_no_text():
+    assert cleaner.delete_entities('', test_entities) == ''
+
+
+def test_delete_entities_no_text_no_entities():
+    assert cleaner.delete_entities('', {}) == ''
+
+
+def test_delete_entities_uppercase():
+    assert cleaner.delete_entities('ABC 123 CDE', {'name': ['abc']}) == " 123 CDE"
+
+
+def test_delete_entities_multiple_occurencies():
+    assert cleaner.delete_entities('ABC 123 ABC', {'name': ['aBc', '1']}) == " 23 "
+
+
 def test_make_text_parts():
     text = 'Small apple is hanging on the three'
     parts = cleaner.make_text_parts(text, 12)
