@@ -1,0 +1,13 @@
+version: "3"
+services:
+  textcleaner:
+    build: .
+    command: uvicorn text_cleaner.main:app --reload --workers 1 --host 0.0.0.0 --port 8082
+    ports:
+      - 8082:8082
+    # depends_on:
+    #   - kafka
+    # environment:
+    #   PDF_TEXT_TOPIC: ${PDF_TEXT_TOPIC}
+    #   BOOTSTRAP_SERVERS: kafka:${KAFKA_PORT}
+    container_name: textcleaner
