@@ -58,7 +58,7 @@ def get_cleaned_cv(item_uuid: str):
 
     text = messages.get(item_uuid, None)
 
-    if not text:
+    if text is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
     response_entity = cleaner.detect_entities(text)
@@ -74,7 +74,7 @@ def upload_changes(cv: UploadCV):
     id = entities.pop('id')
     text = messages.pop(id, None)
 
-    if not text:
+    if text is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
     anonymized_text = cleaner.delete_entities(text, entities)
