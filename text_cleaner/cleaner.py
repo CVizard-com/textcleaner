@@ -104,20 +104,50 @@ def detect_entities(text: str) -> dict[list]:
     }
 
 
+def find_ignore_spaces(text: str, word: str) -> tuple[int, int]:
+    """
+    Works like str.find(), but ignores spaces and capitalization and returns (start, stop) index range.
+    """
+    word = word.lower().replace(' ', '')
+    found_index = -1
+    text_index = 0
+
+    while found_index == -1 and text_index < len(text):
+        if text[text_index:].lower().replace(' ', '').find(word) == 0:
+            found_index = text_index
+        text_index += 1
+
+    if found_index == -1:
+        return (-1, -1)
+    
+    start_index = found_index
+    stop_index = found_index
+
+    while text[start_index:stop_index].lower().replace(' ', '') != word and stop_index < len(text):
+        stop_index += 1
+
+    stop_index -= 1
+
+    return start_index, stop_index
+
+
 def find_all_occurrences_with_indexes(text: str, word: str) -> list[tuple[int, int]]:
     occurrences = []
-    index = -1
     
     while True:
-        index = text.find(word, index + 1)
-        if index == -1:
+        last_found_index = occurrences[-1][1] if occurrences else -1
+        start_index, stop_index = find_ignore_spaces(text[last_found_index + 1:], word)
+        if start_index == -1:
             break
-        occurrences.append((index, index + len(word) - 1))
+        occurrences.append((start_index + last_found_index + 1, stop_index + last_found_index + 1))
     
     return occurrences
 
 
 def delete_entities(text: str, entities: dict[list]) -> str:
+    """
+    This deletes all words in entities from text. Ignores spaces and capitalization, but doesn't change spaces or letter size.
+    """
     words_to_delete = []
     for word_list in entities.values():
         words_to_delete.extend(word_list)
@@ -139,6 +169,7 @@ def delete_entities(text: str, entities: dict[list]) -> str:
             new_text += letter
 
     return new_text
+
 
 def make_text_parts(text: str, max_amount_of_chars) -> list[str]:
     """
@@ -182,9 +213,8 @@ def make_text_parts(text: str, max_amount_of_chars) -> list[str]:
 
 
 if __name__ == '__main__':
-    text = 'Michael Cors, Michael Cors, abc123@gmail.com +48-551-523-607 Warsaw, Poland, dasijASFDNSAOIF AAA'
-
-    print(detect_entities(text))
+    text = 'Mich ael Co rs, abc123@gmail.com +48-551-523-607 Warsaw, Poland, dasijASFDNSAOIF AAA'
+    print(delete_entities(text, {'name': ['Michael Cors'], 'address': ['Warsaw', 'Poland'], 'phone': ['+48-551-523-607'], 'email': []}))
 
 
 

@@ -22,7 +22,7 @@ def test_detect_entities():
     }
 
 def test_delete_entities():
-    assert cleaner.delete_entities(text, test_entities) == "     "
+    assert cleaner.delete_entities(text, test_entities) == ""
 
 
 def test_delete_entities_no_entities():
@@ -42,7 +42,15 @@ def test_delete_entities_uppercase():
 
 
 def test_delete_entities_multiple_occurencies():
-    assert cleaner.delete_entities('ABC 123 ABC', {'name': ['aBc', '1']}) == " 23 "
+    assert cleaner.delete_entities('ABC 123 ABC', {'name': ['aBc', '1']}) == "23"
+
+
+def test_delete_entities_with_spaces():
+    assert cleaner.delete_entities('Zbig niew ko nie czko 123', {'name': ['Zbigniew Konieczko']}) == " 123"
+
+
+def test_delete_entities_with_spaces_2():
+    assert cleaner.delete_entities('Zbig niew ko nie czko 123', {'name': ['zbigniew', 'konieczk o']}) == " 123"
 
 
 def test_make_text_parts():

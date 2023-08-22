@@ -5,6 +5,16 @@ from text_cleaner.models import UploadCV
 from text_cleaner import utils
 import threading
 from fastapi.middleware.cors import CORSMiddleware
+from transformers import pipeline
+import spacy
+from text_cleaner.cleaner import (
+    LOCAL_ADDRESS_RECOGNITION_PATH,
+    LOCAL_NAME_RECOGNITION_PATH,
+    NAME_RECOGNITION_MODEL,
+    ADDRESS_RECOGNITION_MODEL,
+    LOCAL_SPACY_PATH,
+    SPACY_MODEL
+)
 
 
 input_topic_name = os.environ['PDF_TEXT_TOPIC']
@@ -22,6 +32,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+try:
+    name_pipe = pipeline('ner', model=LOCAL_NAME_RECOGNITION_PATH, grouped_entities=True)
+except:
+    name_pipe = pipeline('ner', model=NAME_RECOGNITION_MODEL, grouped_entities=True)
+
+try:   
+    address_pipe = pipeline('ner', model=LOCAL_ADDRESS_RECOGNITION_PATH, grouped_entities=True)
+except:
+    address_pipe = pipeline('ner', model=ADDRESS_RECOGNITION_MODEL, grouped_entities=True)
+
+try:
+    spacy_nlp = spacy.load(LOCAL_SPACY_PATH)
+except:
+    spacy_nlp = spacy.load(SPACY_MODEL)
 
 
 def get_kafka_producer():
