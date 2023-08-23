@@ -11,18 +11,8 @@ test_entities = {
     }
 
 
-def test_detect_entities():
-    entities = cleaner.detect_entities(text)
-    assert entities == {
-        'email': ['abc123@gmail.com'],
-        'url': ['https://www.google.com/'],
-        'name': ['Michael Cors'],
-        'address': ['Warsaw Poland'],
-        'phone': ['+48551523607']
-    }
-
 def test_delete_entities():
-    assert cleaner.delete_entities(text, test_entities) == ""
+    assert cleaner.delete_entities(text, test_entities) == "     "
 
 
 def test_delete_entities_no_entities():
@@ -38,29 +28,24 @@ def test_delete_entities_no_text_no_entities():
 
 
 def test_delete_entities_uppercase():
-    assert cleaner.delete_entities('ABC 123 CDE', {'name': ['abc']}) == " 123 CDE"
+    assert cleaner.delete_entities('ABC 123 CdE', {'name': ['abc']}) == " 123 CdE"
 
 
 def test_delete_entities_multiple_occurencies():
-    assert cleaner.delete_entities('ABC 123 ABC', {'name': ['aBc', '1']}) == "23"
+    assert cleaner.delete_entities('ABC 123 ABC', {'name': ['aBc', '1']}) == " 23 "
 
 
-def test_delete_entities_with_spaces():
+def test_delete_entities_text_spaces():
     assert cleaner.delete_entities('Zbig niew ko nie czko 123', {'name': ['Zbigniew Konieczko']}) == " 123"
 
 
-def test_delete_entities_with_spaces_2():
-    assert cleaner.delete_entities('Zbig niew ko nie czko 123', {'name': ['zbigniew', 'konieczk o']}) == " 123"
+def test_delete_entities_entities_spaces():
+    assert cleaner.delete_entities('Zbigniew konieczko 123', {'name': ['zb ig ni ew', 'k onieczk o']}) == "  123"
 
 
-def test_make_text_parts():
-    text = 'Small apple is hanging on the three'
-    parts = cleaner.make_text_parts(text, 12)
-    assert parts == ['Small apple', ' is hanging', ' on the', ' three']
-    assert all(len(part) <= 12 for part in parts)
+def test_find_all_occurencies_with_indexes():
+    assert cleaner.find_all_occurrences_with_indexes('ABC 123 ABC', 'ABC') == [(0, 2), (8, 10)]
+    
 
-
-def test_make_text_parts_shorter_text():
-    text = 'Small apple is hanging on the three'
-    parts = cleaner.make_text_parts(text, 50)
-    assert parts == ['Small apple is hanging on the three']
+def test_find_all_occurencies_with_indexes_no_occurencies():
+    assert cleaner.find_all_occurrences_with_indexes('ABC 123 ABC', 'CBA') == []

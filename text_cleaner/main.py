@@ -1,20 +1,9 @@
-from text_cleaner import cleaner
 import os
-from fastapi import FastAPI, HTTPException
-from text_cleaner.models import UploadCV
-from text_cleaner import utils
 import threading
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from transformers import pipeline
-import spacy
-from text_cleaner.cleaner import (
-    LOCAL_ADDRESS_RECOGNITION_PATH,
-    LOCAL_NAME_RECOGNITION_PATH,
-    NAME_RECOGNITION_MODEL,
-    ADDRESS_RECOGNITION_MODEL,
-    LOCAL_SPACY_PATH,
-    SPACY_MODEL
-)
+from text_cleaner import cleaner, utils, detector, models
+
 
 
 input_topic_name = os.environ['PDF_TEXT_TOPIC']
@@ -32,22 +21,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-try:
-    name_pipe = pipeline('ner', model=LOCAL_NAME_RECOGNITION_PATH, grouped_entities=True)
-except:
-    name_pipe = pipeline('ner', model=NAME_RECOGNITION_MODEL, grouped_entities=True)
-
-try:   
-    address_pipe = pipeline('ner', model=LOCAL_ADDRESS_RECOGNITION_PATH, grouped_entities=True)
-except:
-    address_pipe = pipeline('ner', model=ADDRESS_RECOGNITION_MODEL, grouped_entities=True)
-
-try:
-    spacy_nlp = spacy.load(LOCAL_SPACY_PATH)
-except:
-    spacy_nlp = spacy.load(SPACY_MODEL)
 
 
 def get_kafka_producer():
@@ -79,7 +52,7 @@ consumer_thread = threading.Thread(target=consume_messages)
 consumer_thread.start()
 
 
-@app.get("/api/cleaner/cleaned", response_model=UploadCV)
+@app.get("/api/cleaner/cleaned", response_model=models.UploadCV)
 def get_cleaned_cv(item_uuid: str):
 
     text = messages.get(item_uuid, None)
@@ -87,14 +60,14 @@ def get_cleaned_cv(item_uuid: str):
     if text is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    response_entity = cleaner.detect_entities(text)
+    response_entity = detector.detect_entities(text)
     response_entity['id'] = item_uuid
     response_entity['other'] = []
     return response_entity
 
 
 @app.post("/api/cleaner/upload")
-def upload_changes(cv: UploadCV):
+def upload_changes(cv: models.UploadCV):
 
     entities = cv.dict()
     id = entities.pop('id')
