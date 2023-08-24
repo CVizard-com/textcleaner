@@ -33,17 +33,19 @@ def find_ignore_spaces(text: str, word: str) -> tuple[int, int]:
 
 def find_all_occurrences_with_indexes(text: str, word: str) -> list[tuple[int, int]]:
     occurrences = []
+    current_text_start_index = 0
     
     while True:
-        current_text_start_index = occurrences[-1][1] + 1 if occurrences else 0
         start_index, stop_index = find_ignore_spaces(text[current_text_start_index:], word)
         
-        if start_index == -1:
+        if (start_index, stop_index) == (-1, -1):
             break
         
         word_start_index = current_text_start_index + start_index
         word_stop_index = current_text_start_index + stop_index
+        
         occurrences.append((word_start_index, word_stop_index))
+        current_text_start_index = word_stop_index + 1
     
     return occurrences
 
