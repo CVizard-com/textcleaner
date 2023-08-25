@@ -4,11 +4,12 @@ from spacy.matcher import Matcher
 import re
 
 LOCAL_SPACY_PATH = 'models/en_core_web_sm'
-LOCAL_NAME_RECOGNITION_PATH = 'models/wikineural-multilingual-ner'
-LOCAL_ADDRESS_RECOGNITION_PATH = 'models/wikineural-multilingual-ner'
-
 SPACY_MODEL = 'en_core_web_sm'
+
+LOCAL_NAME_RECOGNITION_PATH = 'models/wikineural-multilingual-ner'
 NAME_RECOGNITION_MODEL = 'Babelscape/wikineural-multilingual-ner'
+
+LOCAL_ADDRESS_RECOGNITION_PATH = 'models/wikineural-multilingual-ner'
 ADDRESS_RECOGNITION_MODEL = 'Babelscape/wikineural-multilingual-ner'
 
 PHONE_NUMBER_REGEX = r'(?:[\+][(]?[0-9]{1,3}[)]?[-\s\.]?)?[(]?[0-9]{1,3}[)]?(?:[-\s\.]?[0-9]{3,5}){2}'
@@ -62,7 +63,7 @@ def get_spacy_nlp():
     return spacy_nlp
 
 
-def detect_names(text: str, model: TransformerModelNer) -> list[str]:
+def detect_data_with_transformers(text: str, model: TransformerModelNer) -> list[str]:
     text_parts = make_text_parts(text, MAX_AMOUT_OF_CHARS_IN_PROMPT)
     
     pipe = model.get_pipe()
@@ -73,27 +74,10 @@ def detect_names(text: str, model: TransformerModelNer) -> list[str]:
         entities = pipe(part)
 
         for entity in entities:
-            if entity['entity_group'] == NAME_ENT_TYPE:
+            if entity['entity_group'] == model.get_ent_name_to_detect():
                 names.append(entity['word'])
 
     return list(set(names))
-
-
-def detect_addresses(text: str, model: TransformerModelNer) -> list[str]:
-    text_parts = make_text_parts(text, MAX_AMOUT_OF_CHARS_IN_PROMPT)
-    
-    pipe = model.get_pipe()
-
-    addresses = []
-
-    for part in text_parts:
-        entities = pipe(part)
-
-        for entity in entities:
-            if entity['entity_group'] == ADDRESS_ENT_TYPE:
-                addresses.append(entity['word'])
-
-    return list(set(addresses))
 
 
 def detect_phone_numbers(text: str) -> list[str]:
@@ -132,8 +116,8 @@ def detect_entities(
     url_nlp=get_spacy_nlp()
     ) -> dict[list]:
     return {
-        'name': detect_names(text, name_model),
-        'address': detect_addresses(text, address_model),
+        'name': detect_data_with_transformers(text, name_model),
+        'address': detect_data_with_transformers(text, address_model),
         'phone': detect_phone_numbers(text),
         'email': detect_emails(text, email_nlp),
         'url': detect_urls(text, url_nlp)

@@ -16,25 +16,25 @@ def test_make_text_parts_shorter_text():
 
 def test_detect_names():
     text = 'My name is John'
-    names = detector.detect_names(text, detector.get_name_recognition_model())
+    names = detector.detect_data_with_transformers(text, detector.get_name_recognition_model())
     assert names == ['John']
     
 
 def test_detect_names_multiple_names():
     text = 'My name is John and my brother is called Michael'
-    names = detector.detect_names(text, detector.get_name_recognition_model())
+    names = detector.detect_data_with_transformers(text, detector.get_name_recognition_model())
     assert set(names) == {'John', 'Michael'}
     
 
 def test_detect_addresses():
     text = 'I live in Warsaw'
-    addresses = detector.detect_addresses(text, detector.get_address_recognition_model())
+    addresses = detector.detect_data_with_transformers(text, detector.get_address_recognition_model())
     assert addresses == ['Warsaw']
     
 
 def test_detect_addresses_multiple_addresses():
     text = 'I live in Warsaw, Poland'
-    addresses = detector.detect_addresses(text, detector.get_address_recognition_model())
+    addresses = detector.detect_data_with_transformers(text, detector.get_address_recognition_model())
     assert set(addresses) == {'Warsaw', 'Poland'}
     
     
