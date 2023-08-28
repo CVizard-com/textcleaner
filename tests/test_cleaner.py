@@ -36,7 +36,7 @@ def test_delete_entities_multiple_occurencies():
 
 
 def test_delete_entities_text_spaces():
-    assert cleaner.delete_entities('Zbig niew ko nie czko 123', {'name': ['Zbigniew Konieczko']}) == " 123"
+    assert cleaner.delete_entities('Zbig niew ko nie czko 123', {'name': ['Zbigniew', 'Konieczko']}) == "  123"
 
 
 def test_delete_entities_entities_spaces():
