@@ -1,6 +1,5 @@
 from transformers import pipeline
 import spacy
-from kafka import KafkaProducer, KafkaConsumer
 
 
 LOCAL_SPACY_PATH = 'models/en_core_web_sm'
@@ -41,13 +40,3 @@ def get_spacy_nlp():
         spacy_nlp = spacy.load(SPACY_MODEL)
         
     return spacy_nlp
-
-
-def create_kafka_consumer(input_topic_name, bootstrap_servers):
-    return KafkaConsumer(input_topic_name, bootstrap_servers=bootstrap_servers, api_version=(0, 10))
-
-def create_kafka_producer(bootstrap_servers):
-    return KafkaProducer(bootstrap_servers=bootstrap_servers, api_version=(0, 10))
-
-def get_messages():
-    return {}
