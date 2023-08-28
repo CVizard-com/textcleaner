@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from text_cleaner import cleaner, utils, detector, models
 
 
-
 input_topic_name = os.environ['PDF_TEXT_TOPIC']
 output_topic_name = os.environ['CLEANED_TEXT_TOPIC']
 bootstrap_servers = [os.environ['BOOTSTRAP_SERVERS']]

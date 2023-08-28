@@ -1,6 +1,7 @@
 def find_ignore_spaces(text: str, word: str) -> tuple[int, int]:
     """
     Works like str.find(), but ignores spaces and returns (start, stop) index range.
+    Returns (-1, -1) if word is not found.
     """
     word = word.replace(' ', '')
     found_index = -1
