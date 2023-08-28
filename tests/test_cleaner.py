@@ -1,4 +1,4 @@
-from text_cleaner import cleaner
+from text_cleaner.cleaner import cleaner
 
 
 text = "Michael Cors abc123@gmail.com https://www.google.com/ +48551523607 Warsaw Poland"

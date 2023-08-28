@@ -1,4 +1,4 @@
-from text_cleaner.transformer_model_ner import TransformerModelNer
+from text_cleaner.detector.transformer_model_ner import TransformerModelNer
 import spacy
 
 

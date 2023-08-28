@@ -2,7 +2,10 @@ import os
 import threading
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from text_cleaner import cleaner, utils, detector, models
+from text_cleaner import utils, models
+from text_cleaner.detector import detector
+from text_cleaner.cleaner import cleaner
+from text_cleaner.cleaner import cleaner
 
 
 input_topic_name = os.environ['PDF_TEXT_TOPIC']
