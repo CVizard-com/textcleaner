@@ -1,4 +1,4 @@
-from text_cleaner.detector import detector
+from text_cleaner import config_detector, detector
 
 
 def test_make_text_parts():
@@ -16,25 +16,25 @@ def test_make_text_parts_shorter_text():
 
 def test_detect_names():
     text = 'My name is John'
-    names = detector.detect_data_with_transformers(text, detector.get_name_recognition_model())
+    names = detector.detect_data_with_transformers(text, config_detector.get_name_recognition_pipe(), config_detector.NAME_ENT_TYPE)
     assert names == ['John']
     
 
 def test_detect_names_multiple_names():
     text = 'My name is John and my brother is called Michael'
-    names = detector.detect_data_with_transformers(text, detector.get_name_recognition_model())
+    names = detector.detect_data_with_transformers(text, config_detector.get_name_recognition_pipe(), config_detector.NAME_ENT_TYPE)
     assert set(names) == {'John', 'Michael'}
     
 
 def test_detect_addresses():
     text = 'I live in Warsaw'
-    addresses = detector.detect_data_with_transformers(text, detector.get_address_recognition_model())
+    addresses = detector.detect_data_with_transformers(text, config_detector.get_address_recognition_pipe(), config_detector.ADDRESS_ENT_TYPE)
     assert addresses == ['Warsaw']
     
 
 def test_detect_addresses_multiple_addresses():
     text = 'I live in Warsaw, Poland'
-    addresses = detector.detect_data_with_transformers(text, detector.get_address_recognition_model())
+    addresses = detector.detect_data_with_transformers(text, config_detector.get_address_recognition_pipe(), config_detector.ADDRESS_ENT_TYPE)
     assert set(addresses) == {'Warsaw', 'Poland'}
     
     
@@ -52,25 +52,25 @@ def test_detect_phone_numbers_multiple_phone_numbers():
 
 def test_detect_emails():
     text = 'My email is abc123@gmail.com'
-    emails = detector.detect_emails(text, detector.get_spacy_nlp())
+    emails = detector.detect_emails(text, config_detector.get_spacy_nlp())
     assert emails == ['abc123@gmail.com']
 
 
 def test_detect_emails_multiple_emails():
     text = 'My email is abc123@gmail.com, my second email is def456@onet.pl'
-    emails = detector.detect_emails(text, detector.get_spacy_nlp())
+    emails = detector.detect_emails(text, config_detector.get_spacy_nlp())
     assert set(emails) == {'abc123@gmail.com', 'def456@onet.pl'}
     
 
 def test_detect_urls():
     text = 'My website is https://www.google.com/'
-    urls = detector.detect_urls(text, detector.get_spacy_nlp())
+    urls = detector.detect_urls(text, config_detector.get_spacy_nlp())
     assert urls == ['https://www.google.com/']
     
 
 def test_detect_urls_multiple_urls():
     text = 'My website is https://www.google.com/ and my second website is https://www.onet.pl/'
-    urls = detector.detect_urls(text, detector.get_spacy_nlp())
+    urls = detector.detect_urls(text, config_detector.get_spacy_nlp())
     assert set(urls) == {'https://www.google.com/', 'https://www.onet.pl/'}
     
 
@@ -83,4 +83,13 @@ def test_detect_entities():
             'address': ['Warsaw Poland'],
             'phone': ['+48551523607']
         }
-    assert detector.detect_entities(text) == test_entities
+    assert detector.detect_entities(
+        text=text,
+        name_pipe=config_detector.get_name_recognition_pipe(),
+        address_pipe=config_detector.get_address_recognition_pipe(),
+        name_ent_type=config_detector.NAME_ENT_TYPE,
+        address_ent_type=config_detector.ADDRESS_ENT_TYPE,
+        email_nlp=config_detector.get_spacy_nlp(),
+        url_nlp=config_detector.get_spacy_nlp(),
+    ) == test_entities
+    

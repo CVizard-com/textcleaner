@@ -1,19 +1,14 @@
 from spacy.matcher import Matcher
 import re
-from text_cleaner.detector.transformer_model_ner import TransformerModelNer
-from text_cleaner.detector.detector_config import (
-    PHONE_NUMBER_REGEX,
-    MAX_AMOUT_OF_CHARS_IN_PROMPT,
-    get_address_recognition_model,
-    get_name_recognition_model,
-    get_spacy_nlp
-)
-        
+from transformers import Pipeline
 
-def detect_data_with_transformers(text: str, model: TransformerModelNer) -> list[str]:
+
+PHONE_NUMBER_REGEX = r'(?:[\+][(]?[0-9]{1,3}[)]?[-\s\.]?)?[(]?[0-9]{1,3}[)]?(?:[-\s\.]?[0-9]{3,5}){2}'
+MAX_AMOUT_OF_CHARS_IN_PROMPT = 1600
+
+
+def detect_data_with_transformers(text: str, pipe: Pipeline, ent_name) -> list[str]:
     text_parts = make_text_parts(text, MAX_AMOUT_OF_CHARS_IN_PROMPT)
-    
-    pipe = model.get_pipe()
 
     names = []
 
@@ -21,7 +16,7 @@ def detect_data_with_transformers(text: str, model: TransformerModelNer) -> list
         entities = pipe(part)
 
         for entity in entities:
-            if entity['entity_group'] == model.get_ent_name_to_detect():
+            if entity['entity_group'] == ent_name:
                 names.append(entity['word'])
 
     return list(set(names))
@@ -57,14 +52,16 @@ def detect_urls(text: str, nlp) -> list[str]:
 
 def detect_entities(
     text: str,
-    name_model=get_name_recognition_model(),
-    address_model=get_address_recognition_model(),
-    email_nlp=get_spacy_nlp(),
-    url_nlp=get_spacy_nlp()
+    name_pipe: Pipeline,
+    address_pipe: Pipeline,
+    name_ent_type: str,
+    address_ent_type: str,
+    email_nlp,
+    url_nlp,
     ) -> dict[list]:
     return {
-        'name': detect_data_with_transformers(text, name_model),
-        'address': detect_data_with_transformers(text, address_model),
+        'name': detect_data_with_transformers(text, name_pipe, name_ent_type),
+        'address': detect_data_with_transformers(text, address_pipe, address_ent_type),
         'phone': detect_phone_numbers(text),
         'email': detect_emails(text, email_nlp),
         'url': detect_urls(text, url_nlp)
