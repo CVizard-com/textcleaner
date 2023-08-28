@@ -1,4 +1,4 @@
-from text_cleaner import detector
+from text_cleaner.detector import detector
 
 
 def test_make_text_parts():

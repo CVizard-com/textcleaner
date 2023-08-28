@@ -1,7 +1,7 @@
 from spacy.matcher import Matcher
 import re
-from text_cleaner.transformer_model_ner import TransformerModelNer
-from text_cleaner.detector_config import (
+from text_cleaner.detector.transformer_model_ner import TransformerModelNer
+from text_cleaner.detector.detector_config import (
     PHONE_NUMBER_REGEX,
     MAX_AMOUT_OF_CHARS_IN_PROMPT,
     get_address_recognition_model,
