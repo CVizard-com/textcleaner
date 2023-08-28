@@ -9,15 +9,15 @@ mocked_messages = {'1234': 'message1', '5678': 'message2'}
 
 @pytest.fixture
 def mock_create_kafka_producer(mocker):
-    return mocker.patch('text_cleaner.utils.create_kafka_producer', autospec=True, return_value=Mock())
+    return mocker.patch('text_cleaner.config_app.create_kafka_producer', autospec=True, return_value=Mock())
 
 @pytest.fixture
 def mock_create_kafka_consumer(mocker):
-    return mocker.patch('text_cleaner.utils.create_kafka_consumer', autospec=True, return_value=Mock())
+    return mocker.patch('text_cleaner.config_app.create_kafka_consumer', autospec=True, return_value=Mock())
 
 @pytest.fixture
 def mock_get_messages(mocker):
-    return mocker.patch('text_cleaner.utils.get_messages', autospec=True, return_value=mocked_messages)
+    return mocker.patch('text_cleaner.config_app.get_messages', autospec=True, return_value=mocked_messages)
 
 
 def test_get_cleaned(mock_get_messages, monkeypatch, mock_create_kafka_producer, mock_create_kafka_consumer):

@@ -2,10 +2,7 @@ import os
 import threading
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from text_cleaner import utils, models
-from text_cleaner.detector import detector
-from text_cleaner.cleaner import cleaner
-from text_cleaner.cleaner import cleaner
+from text_cleaner import config_app, config_detector, models, cleaner, detector
 
 
 input_topic_name = os.environ['PDF_TEXT_TOPIC']
@@ -26,17 +23,17 @@ app.add_middleware(
 
 
 def get_kafka_producer():
-    return utils.create_kafka_producer(bootstrap_servers=bootstrap_servers)
+    return config_app.create_kafka_producer(bootstrap_servers=bootstrap_servers)
 
 def get_kafka_consumer():
-    return utils.create_kafka_consumer(bootstrap_servers=bootstrap_servers, input_topic_name=input_topic_name)
+    return config_app.create_kafka_consumer(bootstrap_servers=bootstrap_servers, input_topic_name=input_topic_name)
 
 
 producer = get_kafka_producer()
 consumer = get_kafka_consumer()
 
 
-messages = utils.get_messages()
+messages = config_app.get_messages()
 
 
 def consume_messages():
@@ -62,7 +59,15 @@ def get_cleaned_cv(item_uuid: str):
     if text is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    response_entity = detector.detect_entities(text)
+    response_entity = detector.detect_entities(
+        text=text,
+        name_pipe=config_detector.get_name_recognition_pipe(),
+        address_pipe=config_detector.get_address_recognition_pipe(),
+        name_ent_type=config_detector.NAME_ENT_TYPE,
+        address_ent_type=config_detector.ADDRESS_ENT_TYPE,
+        email_nlp=config_detector.get_spacy_nlp(),
+        url_nlp=config_detector.get_spacy_nlp(),
+    )
     response_entity['id'] = item_uuid
     response_entity['other'] = []
     return response_entity
